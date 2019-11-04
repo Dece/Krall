@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import pathlib
 import re
@@ -22,13 +23,27 @@ IMAGE_RE = re.compile(
     r').*?)\"'
 )
 
+USERNAME = None
+PASSWORD = None
+SESH = None
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0'
+
 
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('url', type=str)
     argparser.add_argument('-o', '--output', type=str, default='.',
                            help='Output folder')
+    argparser.add_argument('-v', '--verbose', action='store_true',
+                           help='Verbose output')
     args = argparser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True
 
     process_thread(args.url, pathlib.Path(args.output))
 
